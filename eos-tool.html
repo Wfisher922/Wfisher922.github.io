@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>End of Shift Report — Pre EOS Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { --font: 'Inter', -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif; --radius-sm:10px; --radius:16px; --radius-xl:28px; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body { font-family:var(--font); -webkit-font-smoothing:antialiased; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:3rem 1rem 6rem; background:#f0ede8; position:relative; overflow-x:hidden; }
+body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:0; background: radial-gradient(ellipse 80% 60% at 20% 20%, rgba(200,195,190,0.22) 0%, transparent 60%), radial-gradient(ellipse 60% 80% at 80% 10%, rgba(200,195,188,0.15) 0%, transparent 55%), radial-gradient(ellipse 90% 50% at 50% 90%, rgba(160,160,160,0.12) 0%, transparent 60%), linear-gradient(160deg, #e8e4de 0%, #f0ede8 35%, #e5e2dc 70%, #ece9e3 100%); }
+body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:0; background: radial-gradient(circle 400px at 75% 25%, rgba(150,145,138,0.1) 0%, transparent 70%), radial-gradient(circle 500px at 25% 70%, rgba(160,155,148,0.08) 0%, transparent 70%); animation:drift 18s ease-in-out infinite alternate; }
+@keyframes drift{from{transform:translateY(0) translateX(0)}to{transform:translateY(-30px) translateX(20px)}}
+.page-wrap { position:relative; z-index:1; width:100%; max-width:700px; }
+
+.app-header { display:flex; flex-direction:column; align-items:flex-start; margin-bottom:2rem; padding:0 6px; }
+.app-icon { width:56px; height:56px; background:linear-gradient(145deg, rgba(100,80,220,0.85), rgba(60,40,180,0.9)); border-radius:14px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(80,60,200,0.4), 0 0 0 1px rgba(255,255,255,0.3) inset; margin-bottom:1.25rem; }
+.app-icon svg { width:28px; height:28px; fill:white; }
+.app-eyebrow { font-size:13px; font-weight:500; color:rgba(80,80,90,0.8); margin-bottom:6px; }
+.app-title { font-size:42px; font-weight:700; color:#1c1c1e; letter-spacing:-2px; line-height:1.0; margin-bottom:8px; }
+.app-subtitle { font-size:17px; color:rgba(60,60,67,0.6); font-weight:400; }
+
+.card { width:100%; border-radius:var(--radius-xl); overflow:hidden; background:rgba(255,255,255,0.45); border:0.5px solid rgba(255,255,255,0.9); box-shadow:0 0 0 1px rgba(255,255,255,0.6) inset, 0 12px 60px rgba(0,0,0,0.1), 0 4px 16px rgba(0,0,0,0.07); backdrop-filter:blur(60px) saturate(200%); -webkit-backdrop-filter:blur(60px) saturate(200%); animation:fadeUp 0.4s cubic-bezier(0.32,0.72,0,1) both; }
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px) scale(0.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+.card-section { padding:1.5rem 1.75rem; border-bottom:0.5px solid rgba(0,0,0,0.07); }
+.card-section:last-child { border-bottom:none; }
+.section-title { font-size:11px; font-weight:600; color:rgba(0,0,0,0.35); text-transform:uppercase; letter-spacing:0.7px; margin-bottom:1rem; }
+
+.fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.field-full { grid-column:1/-1; }
+.field label { display:block; font-size:12px; font-weight:500; color:rgba(0,0,0,0.45); margin-bottom:6px; }
+input[type="text"], input[type="date"], select, textarea {
+  width:100%; padding:11px 14px; font-family:var(--font); font-size:15px;
+  color:#1c1c1e; background:rgba(255,255,255,0.6); border:0.5px solid rgba(0,0,0,0.12);
+  border-radius:var(--radius-sm); outline:none; transition:all 0.18s;
+  -webkit-appearance:none; appearance:none; color-scheme:light;
+}
+input:focus, select:focus, textarea:focus { border-color:rgba(80,60,200,0.4); background:rgba(255,255,255,0.85); box-shadow:0 0 0 3px rgba(80,60,200,0.1); }
+textarea { resize:vertical; line-height:1.5; }
+select { cursor:pointer; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(0,0,0,0.4)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:36px; }
+select option { background:#fff; color:#1c1c1e; }
+
+/* Tally table */
+.tally-table { width:100%; border-collapse:collapse; }
+.tally-table th { font-size:11px; font-weight:600; color:rgba(0,0,0,0.4); text-transform:uppercase; letter-spacing:0.5px; padding:8px 10px; text-align:left; border-bottom:0.5px solid rgba(0,0,0,0.08); }
+.tally-table td { padding:6px 6px; border-bottom:0.5px solid rgba(0,0,0,0.05); vertical-align:middle; }
+.tally-table tr:last-child td { border-bottom:none; }
+.row-num { font-size:12px; color:rgba(0,0,0,0.3); font-weight:500; width:28px; }
+.row-label { font-size:14px; color:#1c1c1e; font-weight:500; padding-right:8px; }
+.count-input { width:70px !important; padding:7px 10px !important; font-size:14px !important; text-align:center; }
+.notes-input { font-size:13px !important; padding:7px 10px !important; }
+.status-select { font-size:13px !important; padding:7px 28px 7px 10px !important; width:110px !important; }
+
+/* Total badge */
+.total-row { background:rgba(80,60,200,0.06); border-radius:10px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
+.total-label { font-size:13px; font-weight:600; color:#1c1c1e; }
+.total-value { font-size:24px; font-weight:700; color:rgba(80,60,200,0.9); letter-spacing:-1px; }
+
+/* Copy button */
+.copy-btn { width:100%; padding:15px 16px; font-family:var(--font); font-size:16px; font-weight:600; border-radius:var(--radius); cursor:pointer; border:0.5px solid rgba(255,255,255,0.5); background:rgba(80,60,200,0.5); color:white; letter-spacing:-0.3px; transition:all 0.2s cubic-bezier(0.32,0.72,0,1); backdrop-filter:blur(30px); box-shadow:0 0 0 1px rgba(255,255,255,0.25) inset, 0 6px 24px rgba(80,60,200,0.25); margin-bottom:10px; }
+.copy-btn:hover { background:rgba(80,60,200,0.7); transform:translateY(-1px); }
+.copy-btn:active { transform:scale(0.98); }
+.copy-btn.secondary { background:rgba(0,0,0,0.08); color:#1c1c1e; border-color:rgba(0,0,0,0.12); box-shadow:none; }
+.copy-btn.secondary:hover { background:rgba(0,0,0,0.13); }
+
+.toast { text-align:center; font-size:13px; font-weight:500; color:rgba(30,150,60,0.9); height:18px; opacity:0; transition:opacity 0.25s; }
+.toast.show { opacity:1; }
+.footer { margin-top:2rem; font-size:12px; color:rgba(0,0,0,0.2); text-align:center; }
+.back-link { display:inline-flex; align-items:center; gap:6px; font-size:13px; color:rgba(80,60,200,0.8); font-weight:500; text-decoration:none; margin-bottom:1.5rem; transition:color 0.15s; }
+.back-link:hover { color:rgba(80,60,200,1); }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <a class="back-link" href="./index.html">← Back to Tools</a>
+
+  <div class="app-header">
+    <div class="app-icon">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+    </div>
+    <div class="app-eyebrow">Customer Engagement Team</div>
+    <div class="app-title">End of Shift<br>Report</div>
+    <div class="app-subtitle">Pre EOS Activity Tally</div>
+  </div>
+
+  <div class="card">
+
+    <!-- Header info -->
+    <div class="card-section">
+      <div class="section-title">Shift Information</div>
+      <div class="fields">
+        <div class="field"><label>Name</label><input type="text" id="eos-name" placeholder="Your name" /></div>
+        <div class="field"><label>Date</label><input type="date" id="eos-date" /></div>
+        <div class="field"><label>Shift</label>
+          <select id="eos-shift">
+            <option value="">Select shift...</option>
+            <option>Morning</option>
+            <option>Afternoon</option>
+            <option>Evening</option>
+            <option>Night</option>
+          </select>
+        </div>
+        <div class="field"><label>Tasks</label><input type="text" id="eos-tasks" placeholder="e.g. Phones, Mailbox, Council" /></div>
+      </div>
+    </div>
+
+    <!-- Activity Tally -->
+    <div class="card-section">
+      <div class="section-title">Activity Tally</div>
+      <table class="tally-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Activity / Category</th>
+            <th>Count</th>
+            <th>Notes / Details</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tally-body"></tbody>
+      </table>
+      <div class="total-row" style="margin-top:1rem;">
+        <div class="total-label">Total Activities Completed</div>
+        <div class="total-value" id="total-count">0</div>
+      </div>
+    </div>
+
+    <!-- Comments -->
+    <div class="card-section">
+      <div class="section-title">Additional Comments & Notes</div>
+      <div class="field">
+        <label>Obstacles faced, questions, comments, or concerns</label>
+        <textarea id="eos-comments" rows="4" placeholder="Add any notes here..."></textarea>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="card-section">
+      <button class="copy-btn" onclick="copyReport()">📋 Copy Report for Claude</button>
+      <button class="copy-btn secondary" onclick="clearAll()">Clear All Fields</button>
+      <div class="toast" id="eos-toast"></div>
+      <div style="margin-top:10px;font-size:12px;color:rgba(0,0,0,0.4);text-align:center;">Paste into <strong>claude.ai</strong> to generate your formatted EOS report</div>
+    </div>
+
+  </div>
+
+  <p class="footer">City of Atlanta · Department of Public Works · Customer Engagement Division</p>
+</div>
+
+<script>
+const ACTIVITIES = [
+  'Premature Closures',
+  'Escalations',
+  'Responses Via DPW Mailbox',
+  'Council Report Entries',
+  'Cart Closures',
+  'In Person Customer Engagement',
+  'Complaints',
+  'Exceptions',
+  'DPW Requests',
+  'PW Settlements',
+  'Customer Contact via Phone',
+  'Customer Contact via Email',
+  'Customer Contact via Customer Service Mailbox',
+  'Legislative Tasks',
+  'Other'
+];
+
+const STATUSES = ['N/A','In Progress','Completed','Pending','Escalated'];
+
+function buildTable() {
+  const tbody = document.getElementById('tally-body');
+  ACTIVITIES.forEach((act, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="row-num">${i+1}</td>
+      <td class="row-label">${act}</td>
+      <td><input type="text" class="count-input" id="count-${i}" value="0" oninput="updateTotal()" /></td>
+      <td><input type="text" class="notes-input" id="notes-${i}" placeholder="Notes..." style="width:100%" /></td>
+      <td>
+        <select class="status-select" id="status-${i}">
+          ${STATUSES.map(s => `<option${s==='N/A'?' selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function updateTotal() {
+  let total = 0;
+  ACTIVITIES.forEach((_, i) => {
+    const val = parseInt(document.getElementById('count-'+i)?.value) || 0;
+    total += val;
+  });
+  document.getElementById('total-count').textContent = total;
+}
+
+function copyReport() {
+  const name = document.getElementById('eos-name').value.trim() || 'N/A';
+  const date = document.getElementById('eos-date').value || 'N/A';
+  const shift = document.getElementById('eos-shift').value || 'N/A';
+  const tasks = document.getElementById('eos-tasks').value.trim() || 'N/A';
+  const comments = document.getElementById('eos-comments').value.trim() || 'None';
+  const total = document.getElementById('total-count').textContent;
+
+  let tallyLines = '';
+  ACTIVITIES.forEach((act, i) => {
+    const count = document.getElementById('count-'+i)?.value || '0';
+    const notes = document.getElementById('notes-'+i)?.value.trim() || '';
+    const status = document.getElementById('status-'+i)?.value || 'N/A';
+    tallyLines += `  ${i+1}. ${act}: ${count}${notes ? ' — ' + notes : ''} [${status}]\n`;
+  });
+
+  const prompt = `You are a Customer Engagement Representative for the City of Atlanta Department of Public Works. Please format this End of Shift Report professionally:
+
+SHIFT INFORMATION:
+- Name: ${name}
+- Date: ${date}
+- Shift: ${shift}
+- Tasks: ${tasks}
+- Total Requests: ${total}
+
+ACTIVITY TALLY:
+${tallyLines}
+ADDITIONAL COMMENTS:
+${comments}
+
+Please format this as a clean, professional End of Shift Report that could be submitted to a supervisor. Include all the activity data and make it easy to read.`;
+
+  navigator.clipboard.writeText(prompt).then(() => {
+    const toast = document.getElementById('eos-toast');
+    toast.textContent = '✓ Report copied! Paste into claude.ai to format it.';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+  });
+}
+
+function clearAll() {
+  document.getElementById('eos-name').value = '';
+  document.getElementById('eos-date').value = '';
+  document.getElementById('eos-shift').value = '';
+  document.getElementById('eos-tasks').value = '';
+  document.getElementById('eos-comments').value = '';
+  ACTIVITIES.forEach((_, i) => {
+    document.getElementById('count-'+i).value = '0';
+    document.getElementById('notes-'+i).value = '';
+    document.getElementById('status-'+i).value = 'N/A';
+  });
+  updateTotal();
+}
+
+function setToday() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const d = String(now.getDate()).padStart(2,'0');
+  document.getElementById('eos-date').value = `${y}-${m}-${d}`;
+}
+
+buildTable();
+setToday();
+</script>
+</body>
+</html>
