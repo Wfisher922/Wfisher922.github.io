@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes · Account Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bone: #f5f2ee;
+    --glass-bg: rgba(255,255,255,0.52);
+    --glass-border: rgba(255,255,255,0.78);
+    --glass-shadow: 0 8px 40px rgba(160,150,135,0.18), 0 1.5px 6px rgba(180,170,155,0.10);
+    --text: #1c1917;
+    --text2: #57534e;
+    --text3: #a8a29e;
+    --accent: #3b7cf6;
+    --green: #1a9e6a;
+    --red: #d63c28;
+    --purple: #7c3aed;
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bone);
+    background-image:
+      radial-gradient(ellipse 80% 60% at 18% 8%, rgba(215,205,195,0.45) 0%, transparent 68%),
+      radial-gradient(ellipse 55% 70% at 88% 82%, rgba(185,210,235,0.2) 0%, transparent 62%),
+      radial-gradient(ellipse 45% 45% at 58% 28%, rgba(255,255,255,0.6) 0%, transparent 58%);
+    min-height: 100vh;
+    font-family: 'DM Sans', sans-serif;
+    padding: 52px 20px 88px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 660px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 16px;
+    animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  .header-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.58);
+    border: 1px solid rgba(255,255,255,0.82);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border-radius: 100px;
+    padding: 5px 15px 5px 11px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 14px rgba(155,145,130,0.12), inset 0 1px 0 rgba(255,255,255,0.95);
+  }
+
+  .pulse-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 0 rgba(59,124,246,0.5);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(59,124,246,0.45); }
+    50%      { box-shadow: 0 0 0 5px rgba(59,124,246,0); }
+  }
+
+  .header-pill span {
+    font-size: 0.71rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--text2);
+    text-transform: uppercase;
+  }
+
+  header h1 {
+    font-size: 2.3rem;
+    font-weight: 200;
+    letter-spacing: -0.04em;
+    color: var(--text);
+    line-height: 1.08;
+  }
+
+  header h1 em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--text2);
+  }
+
+  header p {
+    font-size: 0.86rem;
+    color: var(--text3);
+    margin-top: 9px;
+    font-weight: 300;
+    letter-spacing: 0.015em;
+  }
+
+  /* Glass Card */
+  .glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(30px) saturate(2) brightness(1.03);
+    -webkit-backdrop-filter: blur(30px) saturate(2) brightness(1.03);
+    box-shadow: var(--glass-shadow), inset 0 1.5px 0 rgba(255,255,255,0.88);
+    padding: 22px 22px 22px;
+    animation: fadeUp 0.75s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  .glass-card:nth-child(2) { animation-delay: 0.07s; }
+  .glass-card:nth-child(3) { animation-delay: 0.14s; }
+  .glass-card:nth-child(4) { animation-delay: 0.21s; }
+  .glass-card:nth-child(5) { animation-delay: 0.28s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px) scale(0.99); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .step-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .step-badge {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.75);
+    border: 1px solid rgba(255,255,255,0.92);
+    box-shadow: 0 1px 5px rgba(150,140,125,0.14), inset 0 1px 0 rgba(255,255,255,1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0;
+    flex-shrink: 0;
+  }
+
+  .step-name {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+
+  /* Chips */
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 15px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.68);
+    background: rgba(255,255,255,0.48);
+    color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.81rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    user-select: none;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 1px 5px rgba(155,145,130,0.09), inset 0 1px 0 rgba(255,255,255,0.92);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .chip:hover {
+    background: rgba(255,255,255,0.72);
+    border-color: rgba(255,255,255,0.95);
+    transform: translateY(-1.5px);
+    box-shadow: 0 5px 18px rgba(150,140,125,0.14), inset 0 1px 0 rgba(255,255,255,1);
+  }
+
+  .chip .e { font-size: 0.88em; line-height: 1; }
+
+  .chip.contact-type.active {
+    background: linear-gradient(140deg, rgba(59,124,246,0.16) 0%, rgba(59,124,246,0.08) 100%);
+    border-color: rgba(59,124,246,0.38);
+    color: #1a4db8;
+    box-shadow: 0 3px 14px rgba(59,124,246,0.16), inset 0 1px 0 rgba(255,255,255,0.75);
+    font-weight: 500;
+  }
+
+  .chip.issue-type.active {
+    background: linear-gradient(140deg, rgba(214,60,40,0.13) 0%, rgba(214,60,40,0.07) 100%);
+    border-color: rgba(214,60,40,0.32);
+    color: var(--red);
+    box-shadow: 0 3px 14px rgba(214,60,40,0.13), inset 0 1px 0 rgba(255,255,255,0.75);
+    font-weight: 500;
+  }
+
+  .chip.action-type.active {
+    background: linear-gradient(140deg, rgba(26,158,106,0.14) 0%, rgba(26,158,106,0.07) 100%);
+    border-color: rgba(26,158,106,0.32);
+    color: var(--green);
+    box-shadow: 0 3px 14px rgba(26,158,106,0.13), inset 0 1px 0 rgba(255,255,255,0.75);
+    font-weight: 500;
+  }
+
+  .chip.team-type.active {
+    background: linear-gradient(140deg, rgba(124,58,237,0.13) 0%, rgba(124,58,237,0.07) 100%);
+    border-color: rgba(124,58,237,0.32);
+    color: var(--purple);
+    box-shadow: 0 3px 14px rgba(124,58,237,0.13), inset 0 1px 0 rgba(255,255,255,0.75);
+    font-weight: 500;
+  }
+
+  .feather {
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(195,185,172,0.32) 25%, rgba(195,185,172,0.32) 75%, transparent 100%);
+    margin: 16px 0;
+  }
+
+  .sub-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 11px;
+  }
+
+  .glass-input {
+    width: 100%;
+    background: rgba(255,255,255,0.42);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: var(--radius-sm);
+    padding: 11px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 300;
+    margin-top: 13px;
+    outline: none;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 4px rgba(175,165,150,0.07), 0 1px 0 rgba(255,255,255,0.88);
+    transition: all 0.22s;
+  }
+
+  .glass-input::placeholder { color: var(--text3); }
+
+  .glass-input:focus {
+    background: rgba(255,255,255,0.68);
+    border-color: rgba(59,124,246,0.38);
+    box-shadow: 0 0 0 3.5px rgba(59,124,246,0.09), inset 0 1px 4px rgba(175,165,150,0.05), 0 1px 0 rgba(255,255,255,1);
+  }
+
+  /* Output */
+  .output-card {
+    background: linear-gradient(150deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.44) 100%);
+    border: 1px solid rgba(255,255,255,0.86);
+    border-radius: var(--radius);
+    backdrop-filter: blur(36px) saturate(2.1) brightness(1.04);
+    -webkit-backdrop-filter: blur(36px) saturate(2.1) brightness(1.04);
+    box-shadow: 0 14px 52px rgba(140,128,115,0.18), 0 2px 8px rgba(160,150,135,0.10), inset 0 2px 0 rgba(255,255,255,0.96);
+    padding: 24px 24px 20px;
+    animation: fadeUp 0.75s cubic-bezier(0.22,1,0.36,1) 0.32s both;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 26px 0 16px;
+    color: var(--text3);
+    gap: 9px;
+  }
+
+  .empty-icon {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.78);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    box-shadow: 0 2px 10px rgba(155,145,130,0.1);
+  }
+
+  .empty-text {
+    font-size: 0.83rem;
+    font-weight: 300;
+    letter-spacing: 0.01em;
+  }
+
+  .note-textarea {
+    width: 100%;
+    border: none;
+    background: transparent;
+    resize: vertical;
+    min-height: 72px;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.94rem;
+    font-weight: 300;
+    line-height: 1.72;
+    color: var(--text);
+    letter-spacing: 0.005em;
+    display: none;
+  }
+
+  .btn-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 20px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn:active { transform: scale(0.95) !important; }
+
+  .btn-gen {
+    background: #1c1917;
+    color: rgba(255,255,255,0.93);
+    box-shadow: 0 4px 18px rgba(28,25,23,0.24), 0 1px 4px rgba(28,25,23,0.14);
+  }
+
+  .btn-gen:hover {
+    background: #2c2925;
+    transform: translateY(-1.5px);
+    box-shadow: 0 7px 26px rgba(28,25,23,0.28), 0 2px 6px rgba(28,25,23,0.14);
+  }
+
+  .btn-rst {
+    background: rgba(255,255,255,0.52);
+    color: var(--text2);
+    border: 1px solid rgba(255,255,255,0.74);
+    box-shadow: 0 1px 5px rgba(155,145,130,0.09), inset 0 1px 0 rgba(255,255,255,0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .btn-rst:hover {
+    background: rgba(255,255,255,0.72);
+    transform: translateY(-1px);
+  }
+
+  .btn-cpy {
+    background: linear-gradient(140deg, rgba(26,158,106,0.15), rgba(26,158,106,0.08));
+    color: var(--green);
+    border: 1px solid rgba(26,158,106,0.3);
+    box-shadow: 0 1px 5px rgba(26,158,106,0.10), inset 0 1px 0 rgba(255,255,255,0.8);
+    margin-left: auto;
+    display: none;
+  }
+
+  .btn-cpy:hover {
+    background: linear-gradient(140deg, rgba(26,158,106,0.22), rgba(26,158,106,0.12));
+    transform: translateY(-1.5px);
+    box-shadow: 0 5px 16px rgba(26,158,106,0.18), inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: rgba(25,22,20,0.86);
+    backdrop-filter: blur(24px) saturate(1.5);
+    -webkit-backdrop-filter: blur(24px) saturate(1.5);
+    color: rgba(255,255,255,0.9);
+    padding: 11px 24px;
+    border-radius: 100px;
+    font-size: 0.79rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.38s cubic-bezier(0.34,1.56,0.64,1);
+    border: 1px solid rgba(255,255,255,0.09);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+    z-index: 100;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="header-pill">
+      <div class="pulse-dot"></div>
+      <span>Account Note Tool</span>
+    </div>
+    <h1>Note <em>Generator</em></h1>
+    <p>Build consistent account notes in seconds</p>
+  </header>
+
+  <!-- 1: Contact -->
+  <div class="glass-card">
+    <div class="step-row">
+      <div class="step-badge">1</div>
+      <div class="step-name">Contact Method</div>
+    </div>
+    <div class="chip-group" id="contact-group">
+      <div class="chip contact-type" data-val="Called customer"><span class="e">📞</span> Called</div>
+      <div class="chip contact-type" data-val="Emailed customer"><span class="e">✉️</span> Emailed</div>
+      <div class="chip contact-type" data-val="Called and emailed customer"><span class="e">📞</span> Called & Emailed</div>
+      <div class="chip contact-type" data-val="Customer called in"><span class="e">📲</span> Customer Called In</div>
+      <div class="chip contact-type" data-val="Customer emailed in"><span class="e">📨</span> Customer Emailed In</div>
+    </div>
+  </div>
+
+  <!-- 2: Issue -->
+  <div class="glass-card">
+    <div class="step-row">
+      <div class="step-badge">2</div>
+      <div class="step-name">Issue / Reason for Contact</div>
+    </div>
+    <div class="chip-group" id="issue-group">
+      <div class="chip issue-type" data-val="missed garbage collection"><span class="e">🗑️</span> Missed Collection</div>
+      <div class="chip issue-type" data-val="missed recycling collection"><span class="e">♻️</span> Missed Recycling</div>
+      <div class="chip issue-type" data-val="missed bulk/yard waste collection"><span class="e">🌿</span> Missed Bulk/Yard Waste</div>
+      <div class="chip issue-type" data-val="a complaint"><span class="e">⚠️</span> Complaint</div>
+      <div class="chip issue-type" data-val="an escalation"><span class="e">🔺</span> Escalation</div>
+      <div class="chip issue-type" data-val="a premature case closure"><span class="e">🔒</span> Premature Closure</div>
+      <div class="chip issue-type" data-val="a damaged cart/bin"><span class="e">🪣</span> Damaged Cart/Bin</div>
+      <div class="chip issue-type" data-val="a missed cart/bin swap"><span class="e">🔄</span> Cart Swap</div>
+    </div>
+    <input class="glass-input" id="issue-detail" type="text" placeholder="Address, date, or context — optional">
+  </div>
+
+  <!-- 3: Action -->
+  <div class="glass-card">
+    <div class="step-row">
+      <div class="step-badge">3</div>
+      <div class="step-name">Action Taken</div>
+    </div>
+    <div class="sub-label">What you did</div>
+    <div class="chip-group" id="action-group">
+      <div class="chip action-type" data-val="educated customer on collection schedule and guidelines"><span class="e">📚</span> Educated Customer</div>
+      <div class="chip action-type" data-val="advised customer of proper set-out procedures"><span class="e">📋</span> Advised Set-Out Procedures</div>
+      <div class="chip action-type" data-val="informed customer of case status and next steps"><span class="e">ℹ️</span> Informed of Case Status</div>
+      <div class="chip action-type" data-val="confirmed case was reopened and is being reviewed"><span class="e">🔓</span> Reopened Case</div>
+      <div class="chip action-type" data-val="apologized for the inconvenience and documented the concern"><span class="e">🤝</span> Documented Concern</div>
+    </div>
+    <div class="feather"></div>
+    <div class="sub-label">Escalated to — optional</div>
+    <div class="chip-group" id="team-group">
+      <div class="chip team-type" data-val="Solid Waste team"><span class="e">🚛</span> Solid Waste</div>
+      <div class="chip team-type" data-val="Cart team"><span class="e">🪣</span> Cart Team</div>
+      <div class="chip team-type" data-val="Special Ops team"><span class="e">⚙️</span> Special Ops</div>
+      <div class="chip team-type" data-val="Supervisor"><span class="e">👤</span> Supervisor</div>
+    </div>
+    <input class="glass-input" id="action-detail" type="text" placeholder="Resolution or follow-up detail — optional">
+  </div>
+
+  <!-- Output -->
+  <div class="output-card">
+    <div class="step-row">
+      <div class="step-badge" style="font-size:0.9rem;">✦</div>
+      <div class="step-name">Generated Note</div>
+    </div>
+
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">✦</div>
+      <div class="empty-text">Select options above to generate your note</div>
+    </div>
+
+    <textarea class="note-textarea" id="note-textarea" spellcheck="true"></textarea>
+
+    <div class="btn-row">
+      <button class="btn btn-gen" onclick="generateNote()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1L7.2 4.5H11L8 6.8L9.2 10.5L6 8.2L2.8 10.5L4 6.8L1 4.5H4.8L6 1Z" fill="currentColor"/></svg>
+        Generate Note
+      </button>
+      <button class="btn btn-rst" onclick="resetAll()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6C2 3.79 3.79 2 6 2C7.38 2 8.6 2.7 9.33 3.76" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M10 6C10 8.21 8.21 10 6 10C4.62 10 3.4 9.3 2.67 8.24" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M9 1.5V4H11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Reset
+      </button>
+      <button class="btn btn-cpy" id="copy-btn" onclick="copyNote()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="6" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M2 8V2.5C2 1.67 2.67 1 3.5 1H8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Copy Note
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">✓ Note copied to clipboard</div>
+
+<script>
+  const state = { contact: null, issue: null, action: null, team: null };
+
+  function setupChips(id, key) {
+    document.getElementById(id).querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const wasActive = chip.classList.contains('active');
+        document.getElementById(id).querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        state[key] = wasActive ? null : chip.dataset.val;
+        if (!wasActive) chip.classList.add('active');
+      });
+    });
+  }
+
+  setupChips('contact-group', 'contact');
+  setupChips('issue-group', 'issue');
+  setupChips('action-group', 'action');
+  setupChips('team-group', 'team');
+
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function generateNote() {
+    const issDet = document.getElementById('issue-detail').value.trim();
+    const actDet = document.getElementById('action-detail').value.trim();
+    const parts = [];
+
+    if (state.contact) parts.push(cap(state.contact));
+    if (state.issue || issDet) {
+      let iss = 'regarding ' + (state.issue || '');
+      if (issDet) iss += (state.issue ? ' — ' : '') + issDet;
+      parts.push(iss.trim());
+    }
+    if (state.action) parts.push(cap(state.action));
+    if (state.team) parts.push('Issue escalated to ' + state.team + ' for follow-up');
+    if (actDet) parts.push(cap(actDet));
+
+    const empty = document.getElementById('empty-state');
+    const ta = document.getElementById('note-textarea');
+    const cb = document.getElementById('copy-btn');
+
+    if (!parts.length) {
+      empty.style.display = 'flex';
+      empty.querySelector('.empty-text').textContent = 'Select at least one option above';
+      return;
+    }
+
+    ta.value = parts.join('. ') + '.';
+    ta.style.display = 'block';
+    ta.style.height = 'auto';
+    ta.style.height = ta.scrollHeight + 'px';
+    empty.style.display = 'none';
+    cb.style.display = 'inline-flex';
+  }
+
+  function resetAll() {
+    Object.keys(state).forEach(k => state[k] = null);
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('issue-detail').value = '';
+    document.getElementById('action-detail').value = '';
+    const ta = document.getElementById('note-textarea');
+    const empty = document.getElementById('empty-state');
+    const cb = document.getElementById('copy-btn');
+    ta.style.display = 'none';
+    empty.style.display = 'flex';
+    empty.querySelector('.empty-text').textContent = 'Select options above to generate your note';
+    cb.style.display = 'none';
+  }
+
+  function copyNote() {
+    const val = document.getElementById('note-textarea').value;
+    if (!val) return;
+    navigator.clipboard.writeText(val).then(() => {
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    });
+  }
+</script>
+</body>
+</html>
